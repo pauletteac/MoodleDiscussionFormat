@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Text Formatting Tool for Moodle</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .container {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+            max-width: 1200px;
+            width: 100%;
+            padding: 40px;
+        }
+
+        h1 {
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 28px;
+            text-align: center;
+        }
+
+        .subtitle {
+            color: #666;
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 14px;
+        }
+
+        .instructions {
+            background: #f8f9fa;
+            border-left: 4px solid #667eea;
+            padding: 15px;
+            margin-bottom: 30px;
+            border-radius: 4px;
+        }
+
+        .instructions h2 {
+            font-size: 16px;
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        .instructions ul {
+            margin-left: 20px;
+            color: #555;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+
+        .text-area-container {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 8px;
+            font-size: 16px;
+        }
+
+        textarea {
+            width: 100%;
+            min-height: 250px;
+            padding: 15px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-family: Arial, sans-serif;
+            font-size: 14px;
+            resize: vertical;
+            transition: border-color 0.3s;
+        }
+
+        textarea:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        #outputText {
+            font-family: 'Times New Roman', serif;
+            font-size: 12pt;
+            line-height: 2;
+            background-color: #f9f9f9;
+        }
+
+        .button-container {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            margin: 20px 0;
+        }
+
+        button {
+            padding: 12px 30px;
+            font-size: 16px;
+            font-weight: bold;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        #convertBtn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        #convertBtn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
+        }
+
+        #copyBtn {
+            background: #28a745;
+            color: white;
+            display: none;
+        }
+
+        #copyBtn:hover {
+            background: #218838;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
+        }
+
+        #copyBtn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        #clearBtn {
+            background: #dc3545;
+            color: white;
+        }
+
+        #clearBtn:hover {
+            background: #c82333;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
+        }
+
+        .success-message {
+            text-align: center;
+            color: #28a745;
+            font-weight: bold;
+            margin-top: 15px;
+            opacity: 0;
+            transition: opacity 0.3s;
+            font-size: 14px;
+        }
+
+        .success-message.show {
+            opacity: 1;
+        }
+
+        .footer {
+            text-align: center;
+            margin-top: 30px;
+            color: #666;
+            font-size: 12px;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 20px;
+            }
+
+            h1 {
+                font-size: 24px;
+            }
+
+            .button-container {
+                flex-direction: column;
+            }
+
+            button {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Text Formatting Tool</h1>
+        <p class="subtitle">Format your text for Moodle discussion boards</p>
+
+        <div class="instructions">
+            <h2>📋 Instructions:</h2>
+            <ul>
+                <li>Paste your text in the input box below</li>
+                <li>Superscripts for citations will be preserved (e.g., reference<sup>1</sup>)</li>
+                <li>Paragraph indentations will be maintained</li>
+                <li>Click "Convert Text" to format as Times New Roman, 12pt, double-spaced</li>
+                <li>Click "Copy Formatted Text" to copy the result to your clipboard</li>
+                <li>Paste directly into your Moodle discussion board</li>
+            </ul>
+        </div>
+
+        <div class="text-area-container">
+            <label for="inputText">Input Text:</label>
+            <textarea 
+                id="inputText" 
+                placeholder="Paste your text here... (Superscripts and indentations will be preserved)"
+                aria-label="Input text area"
+            ></textarea>
+        </div>
+
+        <div class="button-container">
+            <button id="convertBtn" onclick="convertText()">
+                🔄 Convert Text
+            </button>
+            <button id="copyBtn" onclick="copyText()">
+                📋 Copy Formatted Text
+            </button>
+            <button id="clearBtn" onclick="clearBoxes()">
+                🗑️ Clear Boxes
+            </button>
+        </div>
+
+        <div class="text-area-container">
+            <label for="outputText">Formatted Output:</label>
+            <textarea 
+                id="outputText" 
+                readonly 
+                placeholder="Your formatted text will appear here..."
+                aria-label="Output text area"
+            ></textarea>
+        </div>
+
+        <div id="successMessage" class="success-message">
+            ✓ Text copied to clipboard!
+        </div>
+
+        <div class="footer">
+            <p>Formatted text is optimized for Moodle discussion boards</p>
+        </div>
+    </div>
+
+    <script>
+        function convertText() {
+            const inputText = document.getElementById('inputText').value;
+            const outputTextArea = document.getElementById('outputText');
+            const copyBtn = document.getElementById('copyBtn');
+
+            if (!inputText.trim()) {
+                alert('Please paste some text in the input box first.');
+                return;
+            }
+
+            // Process the text to preserve formatting
+            let formattedText = processText(inputText);
+
+            // Set the output
+            outputTextArea.value = formattedText;
+
+            // Show copy button
+            copyBtn.style.display = 'inline-block';
+        }
+
+        function processText(text) {
+            // Split into paragraphs
+            let paragraphs = text.split(/\n\n+/);
+            
+            let processedParagraphs = paragraphs.map(para => {
+                // Trim each paragraph but preserve intentional indentation
+                para = para.trim();
+                
+                if (para.length === 0) return '';
+                
+                // Check if paragraph starts with spaces/tabs (indentation)
+                let hasIndent = /^[\s\t]+/.test(para);
+                
+                // If it has indentation, add a tab character
+                if (hasIndent) {
+                    para = '\t' + para.trim();
+                }
+                
+                return para;
+            });
+
+            // Join paragraphs with double line breaks for double spacing effect
+            return processedParagraphs.filter(p => p.length > 0).join('\n\n');
+        }
+
+        function copyText() {
+            const outputText = document.getElementById('outputText').value;
+            const successMessage = document.getElementById('successMessage');
+
+            if (!outputText.trim()) {
+                alert('No text to copy. Please convert your text first.');
+                return;
+            }
+
+            // Copy to clipboard
+            navigator.clipboard.writeText(outputText).then(() => {
+                // Show success message
+                successMessage.classList.add('show');
+                
+                // Clear both input and output boxes
+                document.getElementById('inputText').value = '';
+                document.getElementById('outputText').value = '';
+                
+                // Hide copy button
+                document.getElementById('copyBtn').style.display = 'none';
+                
+                // Hide success message after 3 seconds
+                setTimeout(() => {
+                    successMessage.classList.remove('show');
+                }, 3000);
+            }).catch(err => {
+                alert('Failed to copy text. Please try selecting and copying manually.');
+                console.error('Copy failed:', err);
+            });
+        }
+
+        function clearBoxes() {
+            // Clear both text areas
+            document.getElementById('inputText').value = '';
+            document.getElementById('outputText').value = '';
+            
+            // Hide copy button
+            document.getElementById('copyBtn').style.display = 'none';
+            
+            // Hide any success message
+            document.getElementById('successMessage').classList.remove('show');
+        }
+
+        // Allow Enter key in textareas
+        document.getElementById('inputText').addEventListener('keydown', function(e) {
+            if (e.key === 'Enter' && e.ctrlKey) {
+                convertText();
+            }
+        });
+    </script>
+</body>
+</html>
